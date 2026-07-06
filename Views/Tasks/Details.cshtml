@@ -1,0 +1,106 @@
+@model TasksManager.Models.TaskModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Task</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DueToDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DueToDate)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+    </dl>
+    @if (User.IsInRole("Member"))
+    {
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Owner)
+            </dt>
+            <dd class="col-sm-10">
+                @Model.Owner!.Name
+            </dd>
+        </dl>
+    }
+    @if (Model.Status == TaskModel.TaskStatus.Deleted)
+    {
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.DeletedDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.DeletedDate)
+            </dd>
+        </dl>
+    }
+    @if (Model.Status == TaskModel.TaskStatus.Completed)
+    {
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CompletedDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CompletedDate)
+            </dd>
+        </dl>
+    }
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.AssignedUsers)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var user in Model.AssignedUsers!)
+            {
+                <div>@user.Name (@user.Email)</div>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    @if (Model.Status != TaskModel.TaskStatus.Deleted)
+    {
+
+        @if (User.IsInRole("Leader"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
+            @: |
+        }
+        else
+        {
+            <form>
+                <button type="submit" asp-action="Submit" class="btn btn-success mt-2 mb-2">Submit</button>
+            </form>
+        }
+    }
+    <a asp-action="Index">Back to List</a>
+</div>
