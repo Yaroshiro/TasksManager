@@ -27,10 +27,40 @@
     </dl>
     <dl class="row">
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Priority)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Priority)
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CreationDate)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.CreationDate == null)
+            {
+                @:ー
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.CreationDate)
+            }
+        </dd>
+    </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DueToDate)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.DueToDate)
+            @if (Model.DueToDate == null)
+            {
+                @:ー
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.DueToDate)
+            }
         </dd>
     </dl>
     <dl class="row">
@@ -41,6 +71,17 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
     </dl>
+    @if (Model.File != null)
+    {
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.File)
+            </dt>
+            <dd class="col-sm-10">
+                <a asp-action="Download" asp-route-id ="@Model.File.Id">@Model.File.OriginalFileName</a>
+            </dd>
+        </dl>
+    }
     @if (User.IsInRole("Member"))
     {
         <dl class="row">
@@ -85,22 +126,32 @@
             }
         </dd>
     </dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Comments)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var comment in Model.Comments!)
+            {
+                <div class="form-group w-50 m-1 p-1">
+                    <label class="control-label">@comment.DateTime</label>
+                    <label class="control-label">@comment.UserName :</label>
+                    <div class="p-2 border rounded bg-light">@comment.Message</div>
+                    @if (comment.File != null)
+                    {
+                        <a asp-action="Download" asp-route-id="@comment.File.Id">@comment.File.OriginalFileName</a>
+                    }
+                </div>
+            }
+        </dd>
+    </dl>
 </div>
 <div>
-    @if (Model.Status != TaskModel.TaskStatus.Deleted)
+    @if (Model.Status != TaskModel.TaskStatus.Deleted && User.IsInRole("Leader"))
     {
 
-        @if (User.IsInRole("Leader"))
-        {
-            <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
-            @: |
-        }
-        else
-        {
-            <form>
-                <button type="submit" asp-action="Submit" class="btn btn-success mt-2 mb-2">Submit</button>
-            </form>
-        }
+        <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
+        @: |
     }
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Back to Tasks</a>
 </div>

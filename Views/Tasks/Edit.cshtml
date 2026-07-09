@@ -1,6 +1,4 @@
-@using System.Reflection;
-@using System.ComponentModel.DataAnnotations;
-@model TasksManager.Models.TaskDTO
+@model TasksManager.Models.TaskViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form enctype="multipart/form-data" asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -25,20 +23,46 @@
                 <span asp-validation-for="DueToDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" disabled="@(!User.IsInRole("Leader"))" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <label asp-for="Priority" class="control-label"></label>
+                <select asp-for="Priority" class="form-select">
+                    @foreach (var p in Enum.GetValues(typeof(TaskModel.TaskPriority)))
+                    {
+                        <option value="@p">@Enum.GetName(typeof(TaskModel.TaskPriority), p)</option>
+                    }
+                </select>
+                <span asp-validation-for="Priority" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SelectedUserIds" class="control-label"></label>
-                <select asp-for="SelectedUserIds" disabled="@(!User.IsInRole("Leader"))" multiple size="1" class="form-select">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" style="height: 200px" disabled="@(!User.IsInRole("Leader"))" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            @if (Model.FileId != null)
+            {
+                <div class="form-group mt-1">
+                    <label asp-for="File" class="control-label"></label>
+                    <a asp-action="Download" asp-route-id="@Model.FileId">@Model.OriginalFileName</a>
+                    <button class="btn btn-secondary" asp-action="DeleteFile" type="submit" asp-route-id="@Model.FileId">Remove</button>
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    <label asp-for="File" class="control-label"></label>
+                    <input asp-for="File" class="form-control" type="file"/>
+                    <span asp-validation-for="File"></span>
+                </div>
+            }
+            <div class="form-group">
+                <label asp-for="AssignedUserIds" class="control-label"></label>
+                <select asp-for="AssignedUserIds" disabled="@(!User.IsInRole("Leader"))" multiple size="1" class="form-select">
                     @foreach (var user in Model.Users!)
                     {
                         <option value="@user.Id"
-                                selected="@(Model.SelectedUserIds.Contains(user.Id) ? "selected" : null)">@user.Name (@user.Email)</option>
+                                selected="@(Model.AssignedUserIds.Contains(user.Id) ? "selected" : null)">@user.Name (@user.Email)</option>
                     }
                 </select>
-                <span asp-validation-for="SelectedUserIds" class="text-danger"></span>
+                <span asp-validation-for="AssignedUserIds" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary mt-2 mb-2" />
@@ -48,7 +72,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Back to Tasks</a>
 </div>
 
 @section Scripts {

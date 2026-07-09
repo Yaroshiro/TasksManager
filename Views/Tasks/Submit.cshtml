@@ -1,0 +1,53 @@
+@model SubmitModel
+
+@{
+    ViewData["Title"] = "Submit";
+}
+
+<h1>Submit</h1>
+
+<h4>Comments</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form enctype="multipart/form-data" asp-action="Submit">
+            @foreach (var comment in Model.Comments)
+            {
+                <div class="form-group w-50 m-1 p-1">
+                    <label class="control-label">@comment.DateTime</label>
+                    <label class="control-label">@comment.UserName :</label>
+                    <div class="p-2 border rounded bg-light">@comment.Message</div>
+                    @if (comment.File != null)
+                    {
+                        <a asp-action="Download" asp-route-id="@comment.File.Id" class="p-0">@comment.File.OriginalFileName</a>
+                    }
+                </div>
+            }
+            <div class="form-group">
+                <label asp-for="message" class="control-label">Comment</label>
+                <textarea asp-for="message" style="height: 200px" class="form-control w-75"></textarea>
+                <span asp-validation-for="message"></span>
+                <label asp-for="file" class="control-label"></label>
+                <input asp-for="file" class="form-control" type="file"/>
+                <span asp-validation-for="file"></span>
+            </div>
+            <div class="form-group">
+                <input name="action" type="submit" value="@(User.IsInRole("Member") ? "Submit" : "Confirm")" class="btn btn-primary mt-2 mb-2" />
+                @if (User.IsInRole("Leader"))
+                {
+                    <input name="action" type="submit" value="Decline" class="btn btn-danger mt-2 mb-2" />
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to Tasks</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,4 +1,4 @@
-@model IEnumerable<TasksManager.Models.TaskModel>
+@model IEnumerable<TasksManager.Models.TaskViewModel>
 
 @{
     ViewData["Title"] = "Tasks";
@@ -6,16 +6,16 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<form asp-action="Index" class="mb-2" method="get">
+<form asp-action="Index" class="mb-2" method="get" asp-route-sortOrder="@ViewData["SortOrder"]">
     <div class="d-flex align-items-center gap-2">
         <label class="control-label">Filter: </label>
-        <select class="form-select" name="SelectedStatus">
-            <option value=-1 selected="@((int?)ViewData["CurrentFilter"] == null || (int?)ViewData["CurrentFilter"]! == -1 ? "selected" : null)">All</option>
+        <select class="form-select" name="Filter">
+            <option value="" selected="@((int?)ViewData["Filter"] == null ? "selected" : null)">All</option>
             @{
                 var items = Html.GetEnumSelectList<TaskModel.TaskStatus>();
                 foreach (var item in items)
                 {
-                    <option value=@item.Value selected=@((int?)ViewData["CurrentFilter"]! == int.Parse(item.Value) ? "selected" : null)>@item.Text</option>
+                    <option value=@item.Value selected=@((int?)ViewData["Filter"]! == int.Parse(item.Value) ? "selected" : null)>@item.Text</option>
                 }
             }
         </select>
@@ -33,27 +33,50 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                <a asp-action="Index"
+                   asp-route-sortOrder="@((string)ViewData["SortOrder"]! == "name" ? "name_desc" : "name")"
+                   asp-route-filter="@ViewData["Filter"]">
+                    @Html.DisplayNameFor(model => model.Name)
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                <a asp-action="Index"
+                   asp-route-sortOrder="@((string)ViewData["SortOrder"]! == "status" ? "status_desc" : "status")"
+                   asp-route-filter="@ViewData["Filter"]">
+                    @Html.DisplayNameFor(model => model.Status)
+                </a>
             </th>
-            <th style="width: 10%">
-                @Html.DisplayNameFor(model => model.DueToDate)
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@((string)ViewData["SortOrder"]! == "priority" ? "priority_desc" : "priority")"
+                   asp-route-filter="@ViewData["Filter"]">
+                    @Html.DisplayNameFor(model => model.Priority)
+                </a>
             </th>
-            <th style="width: 30%">
-                @Html.DisplayNameFor(model => model.Description)
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@((string)ViewData["SortOrder"]! == "duetodate" ? "duetodate_desc" : "duetodate")"
+                   asp-route-filter="@ViewData["Filter"]">
+                    @Html.DisplayNameFor(model => model.DueToDate)
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@((string)ViewData["SortOrder"]! == "assignmentdate" ? "assignmentdate_desc" : "assignmentdate")"
+                   asp-route-filter="@ViewData["Filter"]">
+                    @Html.DisplayNameFor(model => model.CreationDate)
+                </a>
             </th>
             @if (User.IsInRole("Leader"))
             {
                 <th>
-                    @Html.DisplayNameFor(model => model.AssignedUsers)
+                    @Html.DisplayNameFor(model => model.AssignedUserNames)
                 </th>
             }
             else
             {
                 <th>
-                    @Html.DisplayNameFor(model => model.Owner)
+                    @Html.DisplayNameFor(model => model.OwnerName)
                 </th>
             }
             <th></th>
@@ -91,6 +114,9 @@
                     }
                     <span style="color: @color">@Html.DisplayFor(model => item.Status)</span>
                 </td>
+                <td class="@TasksController.GetPriorityClass(item.Priority)">
+                    @Html.DisplayFor(model => item.Priority)
+                </td>
                 <td>
                     @if (item.DueToDate == null)
                     {
@@ -98,32 +124,32 @@
                     }
                     else
                     {
-                        @Html.DisplayFor(model => item.DueToDate);
+                        @Html.DisplayFor(model => item.DueToDate)
                     }
                 </td>
                 <td>
-                    @if (item.Description.Length < 108)
+                    @if (item.CreationDate == null)
                     {
-                        @Html.DisplayFor(model => item.Description)
+                        @:ー
                     }
                     else
                     {
-                        @(item.Description.Substring(0, 107) + "...")
+                        @Html.DisplayFor(model => item.CreationDate)
                     }
                 </td>
                 @if (User.IsInRole("Leader"))
                 {
                     <td>
-                        @foreach (var user in item.AssignedUsers!)
+                        @foreach (var name in item.AssignedUserNames!)
                         {
-                            <div>@user.Name</div>
+                            <div>@name</div>
                         }
                     </td>
                 }
                 else
                 {
                     <td>
-                        @Html.DisplayFor(_ => item.Owner!.Name)
+                        @Html.DisplayFor(_ => item.OwnerName)
                     </td>
                 }
                 <td>
@@ -140,15 +166,14 @@
                 <td>
                     @if (User.IsInRole("Member") && item.Status == TaskModel.TaskStatus.InProgress)
                     {
-                        <form asp-action="Submit" asp-route-id="@item.Id">
-                            <button type="submit" class="btn btn-success mt-2 mb-2">Submit</button>
+                        <form asp-action="Submit" method="get" asp-route-id="@item.Id">
+                            <input type="submit" class="btn btn-success mt-2 mb-2" value="Submit" />
                         </form>
                     }
                     else if (User.IsInRole("Leader") && item.Status == TaskModel.TaskStatus.ConfirmationPending)
                     {
-                        <form asp-action="Approve" asp-route-id="@item.Id">
-                            <input name="action" type="submit" class="btn btn-success mt-2 mb-2" value="Approve" />
-                            <input name="action" type="submit" class="btn btn-secondary mt-2 mb-2" value="Reject" />
+                        <form asp-action="Submit" method="get" asp-route-id="@item.Id">
+                            <input type="submit" class="btn btn-success mt-2 mb-2" value="Check" />
                         </form>
                     }
                 </td>
