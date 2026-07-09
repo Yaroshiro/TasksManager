@@ -8,6 +8,8 @@ namespace TasksManager.Data
     {
         public DbSet<ApplicationUser> UsersDB { get; set; }
         public DbSet<TaskModel> TasksDB { get; set; }
+        public DbSet<TaskCommentModel> CommentsDB { get; set; }
+        public DbSet<FileModel> FilesDB { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
