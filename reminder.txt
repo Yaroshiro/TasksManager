@@ -1,0 +1,6 @@
+Create new MVC project -> 
+install AspNetCore.Core.Identity, Microsoft.EntityFrameworkCore -> 
+Scaffold Identity -> 
+add-migration for database -> 
+update-database -> 
+pray and try to build
