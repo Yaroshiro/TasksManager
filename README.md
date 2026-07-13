@@ -1,6 +1,6 @@
 # TasksManager
 
-TasksManager is a sample task-tracking web application built with .NET 10 using Razor Pages. It provides user authentication, role-based authorization, and CRUD operations for task management backed by Entity Framework Core.
+TasksManager is a sample task-tracking web application built with .NET 10 using Razor Pages. It provides user authentication, role-based authorization, and CRUD operations for task management backed by Entity Framework Core. For an overwiew of app functionality, take a look at the TaskManager.pptx presentation.
 
 Summary
 
